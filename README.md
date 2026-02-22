@@ -9,7 +9,7 @@ Claude's context resets every session. When it spends 20 minutes debugging somet
 ## Install
 
 ```bash
-git clone https://github.com/anthropics/learning-skill.git
+git clone https://github.com/divyekant/learning-skill.git
 cd learning-skill
 bash install.sh
 ```
@@ -25,7 +25,7 @@ Then restart Claude Code (new session or `/restart` if you have a restart comman
 ### Requirements
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with the superpowers plugin
-- (Optional) A memories MCP server for semantic search and cross-project retrieval
+- (Optional) [Memories](https://github.com/divyekant/memories) -- a lightweight semantic memory server for AI agents. Enables semantic search, deduplication, and cross-project retrieval of learnings
 
 ## How It Works
 
@@ -39,7 +39,7 @@ Then restart Claude Code (new session or `/restart` if you have a restart comman
 | Backend | Dependencies | Features |
 |---------|-------------|----------|
 | **Auto-memory files** | None (built into Claude Code) | Appends to `learnings.md` in project memory directory |
-| **Memories MCP** | Memories MCP server | Semantic search, deduplication, cross-project retrieval |
+| **[Memories](https://github.com/divyekant/memories) MCP** | Memories server | Semantic search, deduplication, cross-project retrieval |
 
 The skill auto-detects which backend is available. If Memories MCP tools exist, it uses them. Otherwise it falls back to file-based storage.
 
