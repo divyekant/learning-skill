@@ -60,16 +60,57 @@ Do NOT mix backends in a single session.
 
 1. **Read existing learnings:**
    Read `~/.claude/projects/<project-path>/memory/learnings.md`
-   If a similar learning already exists, skip.
 
-2. **Append:**
+2. **Check for supersede candidate:**
+   Scan existing entries for one with the same category AND overlapping keywords in the summary or context.
+   - If a match exists with a **different solution** → go to "Superseding a Learning" below
+   - If a match exists with the **same solution** → skip (already recorded)
+   - If no match → continue to step 3
+
+3. **Append:**
    Edit the file to append:
    ```
    ## <category>: <one-line summary>
+   <!-- created: YYYY-MM-DD -->
    - **Tried:** <what failed>
    - **Solution:** <what worked>
    - **Context:** <project/tool>
    ```
+
+## Superseding a Learning
+
+When a new learning covers the same problem as an existing one but with a different/better solution, supersede rather than duplicate.
+
+### With Memories MCP
+
+The Memories API handles reconciliation OOB via `memory_is_novel` and its dedup logic.
+
+**Edge case:** If `memory_is_novel` returns not-novel, but you can see the existing learning has a clearly different (worse or outdated) solution:
+1. `mcp__memories__memory_search(query="<summary>", k=3)` to find the existing entry
+2. `mcp__memories__memory_delete(id=<old_learning_id>)` to remove it
+3. `mcp__memories__memory_add(...)` to record the new learning
+
+This should be rare — only when you're confident the new solution supersedes the old one.
+
+### With Auto-memory Files
+
+1. **Archive the old entry:**
+   Read `~/.claude/projects/<project-path>/memory/learnings-archive.md` (create if it doesn't exist).
+   Append the old entry with supersede metadata:
+   ```
+   ## <old category>: <old summary>
+   <!-- created: <old date>, superseded: YYYY-MM-DD -->
+   <!-- superseded-by: <new summary> -->
+   - **Tried:** <old tried>
+   - **Solution:** <old solution>
+   - **Context:** <old context>
+   ```
+
+2. **Remove old entry from learnings.md:**
+   Edit `learnings.md` to remove the old entry (the full block from `##` to the next `##` or end of file).
+
+3. **Write new entry to learnings.md:**
+   Append the new learning with the standard format (including `<!-- created: YYYY-MM-DD -->`).
 
 ## Retrieving Learnings
 
@@ -82,6 +123,27 @@ mcp__memories__memory_search(query="<description of what you're about to do>", k
 
 ### With Auto-memory Files
 Read `learnings.md` and scan for relevant entries.
+
+### Age Awareness
+
+When reviewing retrieved learnings, check how old they are:
+- **Auto-memory files:** Parse the `<!-- created: YYYY-MM-DD -->` comment
+- **Memories MCP:** Check the stored timestamp on the returned entry
+
+**If a learning is older than 6 months:** treat it as a lower-confidence hint. Verify it still applies to the current environment before relying on it. Don't discard it — just confirm before trusting it.
+
+> **Configurable:** 6 months is the default staleness threshold. Fast-moving projects (frequent dependency updates) may want 3 months. Stable infrastructure may be fine with 12 months.
+
+## Limitations by Backend
+
+| Capability | Memories MCP | Auto-memory Files |
+|---|---|---|
+| Semantic dedup | OOB | Keyword-based (imprecise) |
+| Supersede detection | OOB | Category + keyword match |
+| Age awareness | Via stored timestamps | Via `<!-- created -->` comments |
+| Archive | N/A (managed by API) | `learnings-archive.md` |
+
+**Note:** Auto-memory files use keyword matching for supersede detection, which may miss semantically similar but differently worded learnings. Memories MCP handles this via semantic search. If you notice duplicate or contradictory learnings accumulating in auto-memory files, manually clean up `learnings.md`.
 
 ## When to Record (Checklist)
 
