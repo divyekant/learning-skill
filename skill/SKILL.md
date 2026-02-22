@@ -83,7 +83,7 @@ When a new learning covers the same problem as an existing one but with a differ
 
 ### With Memories MCP
 
-The Memories API handles reconciliation OOB via `memory_is_novel` and its dedup logic.
+The Memories API handles reconciliation out-of-the-box (OOB) via `memory_is_novel` and its dedup logic.
 
 **Edge case:** If `memory_is_novel` returns not-novel, but you can see the existing learning has a clearly different (worse or outdated) solution:
 1. `mcp__memories__memory_search(query="<summary>", k=3)` to find the existing entry
@@ -169,6 +169,7 @@ After resolving any of these, STOP and record before moving on:
 | Step | Action |
 |------|--------|
 | 1 | Recognize: you failed and found the fix |
-| 2 | Check: is this already recorded? |
-| 3 | Record: use the [LEARNING] schema |
+| 2 | Check: is this already recorded? If same problem, different fix → supersede |
+| 3 | Record: use the [LEARNING] schema (with `<!-- created -->` date for auto-memory files) |
 | 4 | Before similar work: search past learnings |
+| 5 | Age check: learnings older than 6 months → verify before trusting |
