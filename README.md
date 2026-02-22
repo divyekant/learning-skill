@@ -38,10 +38,19 @@ Then restart Claude Code (new session or `/restart` if you have a restart comman
 
 | Backend | Dependencies | Features |
 |---------|-------------|----------|
-| **Auto-memory files** | None (built into Claude Code) | Appends to `learnings.md` in project memory directory |
-| **[Memories](https://github.com/divyekant/memories) MCP** | Memories server | Semantic search, deduplication, cross-project retrieval |
+| **Auto-memory files** | None (built into Claude Code) | Appends to `learnings.md`, supersedes old learnings to `learnings-archive.md`, keyword-based dedup |
+| **[Memories](https://github.com/divyekant/memories) MCP** | Memories server | Semantic search, deduplication, cross-project retrieval, staleness handled OOB |
 
 The skill auto-detects which backend is available. If Memories MCP tools exist, it uses them. Otherwise it falls back to file-based storage.
+
+### Staleness management
+
+Learnings don't just accumulate — when Claude finds a better fix for a known problem, it supersedes the old learning:
+
+- **Memories MCP:** Reconciliation and dedup are handled by the API. Old learnings are updated automatically.
+- **Auto-memory files:** Old entries are moved to `learnings-archive.md` and the new fix takes their place in `learnings.md`.
+
+Both backends apply age awareness: learnings older than 6 months are treated as lower-confidence hints that should be verified before relying on.
 
 ## Schema
 
